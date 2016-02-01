@@ -1,0 +1,13 @@
+/*
+Styles for Eugene Leaflet Map
+*/
+
+#map { height: 800px; }
+
+body {
+	background-color: black;
+}
+
+#heading {
+	color: white;
+}

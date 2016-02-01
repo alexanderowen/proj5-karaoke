@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+	<!--leaflet files-->	 
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+	 
+	<!--mapbox files-->	 
+	<script src='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js'></script>
+	<link href='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.css' rel='stylesheet' />
+
+
+ 
+	<!--Our own stylesheet-->
+	<link rel="stylesheet" href="/static/css/style.css" />
+	<title>Eugene POIs</title>
+</head>
+
+<body>
+	<h1 id="heading">Eugene Map (dark to preserve energy)</h1>
+	
+    <div id="map"></div>
+
+
+</body>
+
+
+
+<script>
+var map = L.map('map').setView(new L.LatLng(44.04962, -123.09417), 14);
+
+L.tileLayer('http://api.tiles.mapbox.com/v4/{styleid}/{z}/{x}/{y}.png?access_token={accessToken}', {
+    attribution: '',    
+    maxZoom: 18,
+    styleid: 'mapbox.dark',
+    accessToken: 'pk.eyJ1IjoiYWxleGFuZGVyb3dlbiIsImEiOiJjaWszY2xvM3MzOXdwdmdsendydXJhZG5hIn0.WcJIS-8B1668IeLHv_grXQ'
+}).addTo(map);
+
+
+//Testing marker
+/*
+var marker = L.marker([44.04962, -123.09417]).addTo(map);
+marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+*/
+
+//Testing events
+function onMapClick(e) {
+    console.log("You clicked the map at " + e.latlng);
+    var marker = L.marker(e.latlng).addTo(map);
+}
+
+map.on('click', onMapClick);
+
+</script>
+
+</html>
