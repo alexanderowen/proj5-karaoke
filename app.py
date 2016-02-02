@@ -32,7 +32,23 @@ def favicon():
     return flask.send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
                                
-
+@app.route('/_getPOI')
+def get_poi():
+	""" 
+	Get the points of interest from a given filename
+	Return dict
+	"""
+	rslt = {"locations": []}
+	with open("poi.txt") as f:
+		for line in f:
+			line = line.split()
+			lng = line.pop(-1)
+			lat = line.pop(-1)
+			name = " ".join(line)
+			rslt["locations"].append((name,lat,lng))
+	return jsonify(result=rslt)
+				
+	
 ###################
 #   Error handlers
 ###################
