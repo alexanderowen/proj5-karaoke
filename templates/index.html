@@ -54,12 +54,12 @@ map.on('click', function (e) {
     var lat = e.latlng.lat;
     var lng = e.latlng.lng;  
     var addr = getAddress(lat, lng);
-	createMarker(lat, lng, addr);  
+	createMarker(lat, lng, addr).openPopup();  
 });
 
 // Assign user location found event handler
 map.on('locationfound', function (e) {
-	console.log("Found the user at: " + e.latlng);	
+	//console.log("Found the user at: " + e.latlng);	
 	var lat = e.latlng.lat;
 	var lng = e.latlng.lng;
 	var addr = getAddress(lat, lng);
