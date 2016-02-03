@@ -1,3 +1,7 @@
+"""
+Simple server to display points of interests map of Eugene, OR
+"""
+
 import flask
 from flask import render_template
 from flask import request
@@ -35,7 +39,7 @@ def favicon():
 @app.route('/_getPOI')
 def get_poi():
 	""" 
-	Get the points of interest from a given filename
+	Get the points of interest from 'poi.txt'
 	Return dict
 	"""
 	rslt = {"locations": []}

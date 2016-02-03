@@ -10,9 +10,7 @@
 	<link href='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.css' rel='stylesheet' />
 
     <!-- Javascript:  JQuery from a content distribution network (CDN) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-  
-    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>   
     
 	<!--Our own stylesheet-->
 	<link rel="stylesheet" href="/static/css/style.css" />
@@ -20,17 +18,27 @@
 </head>
 
 <body>
-	<h1 id="heading">Eugene Map (dark to preserve energy)</h1>
-	
+	<h1 id="heading">Eugene POI Map</h1>	
     <div id="map"></div>
+    
+    <h3>Why a black map? </h3>
+    
+    <p>Because it saves energy.</p>
+    
+	<p>A black map saves energy because the screen is predominantly black. "Image displayed is primarily a function of the user's color 
+	settings and desktop graphics, as well as the color and size of open application windows; a given monitor requires more power to 
+	display a white (or light) screen than a black (or dark) screen." <a href="http://enduse.lbl.gov/Info/LBNL-48581.pdf">Roberson et al, 2002</a></p>
 
+	<p>In 2016 the majority of monitor sales are LED backlit LCD's which do not light up the parts of the screen that are black. 
+	Some older CCFL LCD monitors worked by wastefully backlighting the entire screen. Since 2005 manufacturers have moved away from CCFL's.</p>
 
+    <p>(Source: <a href="http://blackle.com/about/">Blackle, an energy conscious version of Google</a>)</p>
 </body>
 
 
-
 <script type="text/javascript">
-// Leaflet Map Creation
+/* Map creation and event handler attaching */
+// Leaflet Map Creation, focus on Eugene, OR
 var map = L.map('map').setView(new L.LatLng(44.04962, -123.09417), 14);
 L.tileLayer('http://api.tiles.mapbox.com/v4/{styleid}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: '',    
@@ -39,47 +47,63 @@ L.tileLayer('http://api.tiles.mapbox.com/v4/{styleid}/{z}/{x}/{y}.png?access_tok
     accessToken: 'pk.eyJ1IjoiYWxleGFuZGVyb3dlbiIsImEiOiJjaWszY2xvM3MzOXdwdmdsendydXJhZG5hIn0.WcJIS-8B1668IeLHv_grXQ'
 }).addTo(map);
 
-
-
-//Testing events
-function onMapClick(e) {
+// Assign click on map event handler
+map.on('click', function (e) {
     console.log("You clicked the map at " + e.latlng);    
     
-    var latitude = e.latlng.lat;
-    var longitude = e.latlng.lng;  
-    var tld = "http://www.mapquestapi.com";  
-    var key = "xssMZMw5fn1nIISGJ33GH08hYyOss5Sl";
-	var URL = tld + "/geocoding/v1/reverse?key=" + key + "&json={location:{latLng:{lat:" + latitude + ",lng:" + longitude + "}}};";
-	$.getJSON(URL,
-		  function(data) {
-		      street = data.results[0].locations[0].street;
-		      createMarker(e.latlng.lat, e.latlng.lng, street);   
-		  });    
-}
+    var lat = e.latlng.lat;
+    var lng = e.latlng.lng;  
+    var addr = getAddress(lat, lng);
+	createMarker(lat, lng, addr);  
+});
 
-function onLocationFound(e) {
-	console.log("Found the user at: " + e.latlng);
-	
-	createMarker(e.latlng.lat, e.latlng.lng, "Your Location").openPopup();
-}
+// Assign user location found event handler
+map.on('locationfound', function (e) {
+	console.log("Found the user at: " + e.latlng);	
+	var lat = e.latlng.lat;
+	var lng = e.latlng.lng;
+	var addr = getAddress(lat, lng);
+	createMarker(lat, lng, "Your Location <br> " + addr).openPopup();
+});
+/* End map creation and event handlers */
 
-map.on('click', onMapClick);
-map.on('locationfound', onLocationFound);
-map.locate();
-
+// When page loads, load the POI and get user location
 $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 window.onload = function() {
+	map.locate();	
+
 	$.getJSON($SCRIPT_ROOT + '/_getPOI',
 	function (data) {
 		var locations = data.result.locations;		
 		for (var i = 0; i < locations.length; i++) {
 			loc = locations[i]
-			createMarker(loc[1],loc[2],loc[0]);
+			var address = getAddress(loc[1], loc[2]);
+			createMarker(loc[1],loc[2],loc[0] + "<br>" + address);
 		}		
 	});
 }
 
-function createMarker(lat, lng, msg) {	
+// Get address helper function, makes call to the mapquest geolocation API
+function getAddress(lat, lng) {
+	var address = "";	
+	var tld = "http://www.mapquestapi.com";  
+    var key = "xssMZMw5fn1nIISGJ33GH08hYyOss5Sl";
+	var URL = tld + "/geocoding/v1/reverse?key=" + key + "&json={location:{latLng:{lat:" + lat + ",lng:" + lng + "}}};";	
+	
+	$.ajax({
+	url: URL,
+	async: false,
+	dataType: 'json',
+	success: function(data) {
+		address = data.results[0].locations[0].street;
+		}
+	});
+	
+	return address;
+}
+
+// Create map marker helper function
+function createMarker(lat, lng, msg) {
 	var marker = L.marker([lat,lng]).addTo(map);	
 	marker.bindPopup(msg);
 	
